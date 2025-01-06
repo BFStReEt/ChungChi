@@ -16,7 +16,9 @@ class CreateAdminTable extends Migration
             $table->string('display_name')->nullable();
             $table->string('avatar')->nullable();
             $table->string('skin')->nullable();
-            $table->unsignedBigInteger('depart_id')->nullable();
+            $table->unsignedInteger('depart_id');
+            $table->foreign('depart_id')->references('id')->on('department')
+                ->onDelete('cascade');
             $table->boolean('is_default')->default(false);
             $table->timestamp('lastlogin')->nullable();
             $table->string('code_reset')->nullable();
@@ -24,8 +26,6 @@ class CreateAdminTable extends Migration
             $table->string('status')->nullable();
             $table->string('phone')->nullable();
             $table->timestamps();
-
-            $table->foreign('depart_id')->references('id')->on('department')->onDelete('cascade');
         });
     }
 
