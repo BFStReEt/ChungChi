@@ -14,68 +14,86 @@ class AdminService implements AdminServiceInterface
     public function store($request)
     {
         //     if (Gate::allows('THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.add')) {
+        // Xác thực đầu vào
         $validator = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
+            'email' => 'nullable|email',
+            'display_name' => 'nullable|string',
+            'avatar' => 'nullable|array',
+            'phone' => 'nullable|string',
+            'status' => 'nullable|integer',
+            'depart_id' => 'nullable|integer',
+            'role_id' => 'nullable|array',
         ]);
+
         if ($validator->fails()) {
             return response()->json([
-                'message' => 'Vui lòng nhập tên và mật khẩu',
+                'message' => 'Dữ liệu không hợp lệ',
                 'errors' => $validator->errors()
             ], 422);
         }
+
+        // Kiểm tra tên đăng nhập
         $check = Admin::where('username', $request->username)->first();
-        if ($check != '') {
+        if ($check) {
             return response()->json([
-                'message' => 'Tên đăng nhập bị trùng, vui lòng nhập lại',
+                'message' => 'Tên đăng nhập đã tồn tại, vui lòng thử tên khác',
                 'status' => false
-            ], 202);
+            ], 409);
         }
-        $data = $request->only([
-            'username',
-            'password',
-            'email',
-            'display_name',
-            'avatar',
-            'phone',
-            'status',
-            'depart_id',
-        ]);
+
+        // Chuẩn bị dữ liệu
         $userAdmin = new Admin();
-        $userAdmin->username = $request['username'];
-        $userAdmin->password = Hash::make($request['password']);
-        $userAdmin->email = $request['email'];
-        $userAdmin->display_name = $request['display_name'];
+        $userAdmin->username = $request->username;
+        $userAdmin->password = Hash::make($request->password);
+        $userAdmin->email = $request->email;
+        $userAdmin->display_name = $request->display_name;
 
+        // Xử lý ảnh đại diện (avatar)
         $filePath = '';
-        $disPath = public_path();
+        if (!empty($request->avatar) && is_array($request->avatar)) {
+            $avatarData = $request->avatar[0] ?? null;
 
-        if ($request->avatar != null) {
-            $DIR = $disPath . '\uploads\admin';
-            //$httpPost = file_get_contents('php://input');
-            $file_chunks = explode(';base64,', $request->avatar[0]);
-            $fileType = explode('image/', $file_chunks[0]);
-            //$image_type = $fileType[0];
-            $base64Img = base64_decode($file_chunks[1]);
-            //$data = iconv('latin5', 'utf-8', $base64Img);
-            $name = uniqid();
-            $file = $DIR . '\\' . $name . '.png';
-            $filePath = 'admin/' . $name . '.png';
-            file_put_contents($file,  $base64Img);
+            if ($avatarData && str_contains($avatarData, ';base64,')) {
+                $file_chunks = explode(';base64,', $avatarData);
+                $fileType = explode('image/', $file_chunks[0] ?? '');
+
+                if (isset($file_chunks[1], $fileType[1])) {
+                    $base64Img = base64_decode($file_chunks[1]);
+                    $imageType = $fileType[1];
+
+                    $uploadDir = public_path('uploads' . DIRECTORY_SEPARATOR . 'admin');
+                    if (!is_dir($uploadDir)) {
+                        mkdir($uploadDir, 0755, true);
+                    }
+
+                    $fileName = uniqid() . '.' . $imageType;
+                    $filePath = 'uploads/admin/' . $fileName;
+                    file_put_contents($uploadDir . DIRECTORY_SEPARATOR . $fileName, $base64Img);
+                }
+            }
         }
         $userAdmin->avatar = $filePath;
 
-        $userAdmin->skin = "";
+        // Gán các thuộc tính khác
+        $userAdmin->skin = '';
         $userAdmin->is_default = 0;
-        $userAdmin->lastlogin = 0;
-        $userAdmin->code_reset = Hash::make($request['password']);
+        $userAdmin->lastlogin = NULL;
+        $userAdmin->code_reset = Hash::make($request->password);
         $userAdmin->menu_order = 0;
-        $userAdmin->phone = $request['phone'];
-        $userAdmin->status = $request['status'];
-        $userAdmin->depart_id = $request['depart_id'];
+        $userAdmin->phone = $request->phone;
+        $userAdmin->status = $request->status;
+        $userAdmin->depart_id = $request->depart_id;
 
+        // Lưu bản ghi admin
         $userAdmin->save();
-        $userAdmin->roles()->attach($request->input('role_id'));
+
+        // Gán vai trò cho admin
+        if ($request->has('role_id') && is_array($request->role_id)) {
+            $userAdmin->roles()->attach($request->role_id);
+        }
+
         return response()->json([
             'status' => true,
             'userAdmin' => $userAdmin,

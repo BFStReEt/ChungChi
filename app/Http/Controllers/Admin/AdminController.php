@@ -22,13 +22,13 @@ class AdminController extends Controller
     {
         try {
             $now = now()->timestamp;
-            DB::table('adminlogs')->insert([
-                'admin_id' => Auth::guard('admin')->user()->id,
-                'time' => $now,
-                'ip' => $request->ip() ?? null,
-                'action' => 'add a admin',
-                'cat' => 'admin',
-            ]);
+            // DB::table('adminlogs')->insert([
+            //     'admin_id' => Auth::guard('admin')->user()->id,
+            //     'time' => $now,
+            //     'ip' => $request->ip() ?? null,
+            //     'action' => 'add a admin',
+            //     'cat' => 'admin',
+            // ]);
             $store = $this->adminService->store($request);
             return $store;
         } catch (\Exception $e) {
