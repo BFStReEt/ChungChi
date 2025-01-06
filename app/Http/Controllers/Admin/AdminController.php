@@ -17,6 +17,7 @@ class AdminController extends Controller
     {
         $this->adminService = $adminService;
     }
+
     public function store(Request $request)
     {
         try {
