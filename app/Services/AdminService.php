@@ -31,6 +31,62 @@ class AdminService implements AdminServiceInterface
                     'status' => false
                 ], 202);
             }
+            $data = $request->only([
+                'username',
+                'password',
+                'email',
+                'display_name',
+                'avatar',
+                'phone',
+                'status',
+                'depart_id',
+            ]);
+            $userAdmin = new Admin();
+            $userAdmin->username = $request['username'];
+            $userAdmin->password = Hash::make($request['password']);
+            $userAdmin->email = $request['email'];
+            $userAdmin->display_name = $request['display_name'];
+
+            $filePath = '';
+            $disPath = public_path();
+
+            if ($request->avatar != null) {
+
+                $DIR = $disPath . '\uploads\admin';
+                $httpPost = file_get_contents('php://input');
+
+                $file_chunks = explode(';base64,', $request->avatar[0]);
+                $fileType = explode('image/', $file_chunks[0]);
+                $image_type = $fileType[0];
+                $base64Img = base64_decode($file_chunks[1]);
+                $data = iconv('latin5', 'utf-8', $base64Img);
+                $name = uniqid();
+                $file = $DIR . '\\' . $name . '.png';
+                $filePath = 'admin/' . $name . '.png';
+                file_put_contents($file,  $base64Img);
+            }
+            $userAdmin->avatar = $filePath;
+
+            $userAdmin->skin = "";
+            $userAdmin->is_default = 0;
+            $userAdmin->lastlogin = 0;
+            $userAdmin->code_reset = Hash::make($request['password']);
+            $userAdmin->menu_order = 0;
+            $userAdmin->phone = $request['phone'];
+            $userAdmin->status = $request['status'];
+            $userAdmin->depart_id = $request['depart_id'];
+
+            $userAdmin->save();
+            $userAdmin->roles()->attach($request->input('role_id'));
+            return response()->json([
+                'status' => true,
+                'userAdmin' => $userAdmin,
+            ]);
+        } else {
+            return response()->json([
+                'status' => false,
+                'mess' => 'no permission',
+            ]);
         }
     }
 }
