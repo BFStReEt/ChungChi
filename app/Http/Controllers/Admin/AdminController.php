@@ -21,11 +21,10 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         try {
-            $now = date('d-m-Y H:i:s');
-            $stringTime = strtotime($now);
+            $now = now()->timestamp;
             DB::table('adminlogs')->insert([
                 'admin_id' => Auth::guard('admin')->user()->id,
-                'time' =>  $stringTime,
+                'time' => $now,
                 'ip' => $request->ip() ?? null,
                 'action' => 'add a admin',
                 'cat' => 'admin',
