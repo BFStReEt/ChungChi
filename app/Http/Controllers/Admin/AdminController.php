@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Admin;
 use App\Services\Interfaces\AdminServiceInterface as AdminService;
-use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -21,7 +20,7 @@ class AdminController extends Controller
     public function store(Request $request)
     {
         try {
-            $now = now()->timestamp;
+            // $now = now()->timestamp;
             // DB::table('adminlogs')->insert([
             //     'admin_id' => Auth::guard('admin')->user()->id,
             //     'time' => $now,
@@ -31,6 +30,19 @@ class AdminController extends Controller
             // ]);
             $store = $this->adminService->store($request);
             return $store;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+
+    public function login(Request $request)
+    {
+        try {
+            $login = $this->adminService->login($request);
+            return $login;
         } catch (\Exception $e) {
             return response()->json([
                 'status' => false,

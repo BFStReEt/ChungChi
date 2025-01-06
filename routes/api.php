@@ -9,3 +9,4 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 Route::post('/admin/store', [AdminController::class, 'store']);
+Route::post('/admin/login', [AdminController::class, 'login']);
