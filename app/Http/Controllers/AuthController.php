@@ -21,7 +21,6 @@ class AuthController extends Controller
 
         try {
             $admin = Auth::guard('admin')->user();
-
             if ($admin) {
                 $permissions = $admin->roles->flatMap(function ($role) {
                     return $role->permissions->pluck('slug');

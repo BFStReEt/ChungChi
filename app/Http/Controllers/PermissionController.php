@@ -2,51 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Permission;
 use App\Models\Admin;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Gate;
+use App\Policies\AdminPolicy;
 
 class PermissionController extends Controller
 {
-    public function index()
+    protected $user;
+    protected $permissionPolicy;
+
+    public function __construct(AdminPolicy $permissionPolicy)
     {
-        $permissions = Permission::all();
+        $this->user = auth('admin')->user();
 
-        $admins = Admin::all();
-
-        $adminPermissions = $admins->map(function ($admin) use ($permissions) {
-            $roles = $admin->roles;
-            $permissionsOfAdmin = [];
-
-            foreach ($roles as $role) {
-                foreach ($role->permissions as $permission) {
-                    $permissionsOfAdmin[] = $permission->slug;
-                }
-            }
-
-            return [
-                'username' => $admin->username,
-                'admin_id' => $admin->id,
-                'admin_name' => $admin->display_name,
-                'permissions' => array_unique($permissionsOfAdmin),
-            ];
-        });
-
-        return response()->json([
-            'status' => true,
-            'admin_permissions' => $adminPermissions,
-        ]);
+        $this->permissionPolicy = $permissionPolicy;
     }
+
     public function hehe()
     {
-        if (Gate::allows('add')) {
-            return response("hehe", 200);
-        } else {
+        if ($this->permissionPolicy->hasPermission($this->user, 'add')) {
             return response()->json([
-                'status' => false,
-                'mess' => 'no permission',
+                'status' => true,
+                'message' => 'hehe',
             ]);
         }
+
+        return response()->json([
+            'status' => false,
+            'message' => 'User does not have permission to add.',
+        ]);
     }
 }

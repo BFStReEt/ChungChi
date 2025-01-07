@@ -3,6 +3,7 @@
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
+use App\Providers\AuthServiceProvider;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -17,5 +18,5 @@ use App\Http\Controllers\AuthController;
 
 Route::get('/checkToken', [AuthController::class, 'checkToken']);
 
-Route::get('/permissions', [PermissionController::class, 'index']);
+Route::post('/permissions', [PermissionController::class, 'index']);
 Route::post('/hehe', [PermissionController::class, 'hehe']);
