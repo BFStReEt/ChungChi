@@ -10,3 +10,12 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/admin/store', [AdminController::class, 'store']);
 Route::post('/admin/login', [AdminController::class, 'login']);
+
+
+use App\Http\Controllers\PermissionController;
+use App\Http\Controllers\AuthController;
+
+Route::get('/checkToken', [AuthController::class, 'checkToken']);
+
+Route::get('/permissions', [PermissionController::class, 'index']);
+Route::post('/hehe', [PermissionController::class, 'hehe']);

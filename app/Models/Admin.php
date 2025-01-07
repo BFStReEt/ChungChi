@@ -7,8 +7,9 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Laravel\Passport\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Support\Facades\Log;
 
-class Admin extends Model
+class Admin extends Authenticatable
 {
     use HasApiTokens, HasFactory, Notifiable;
     protected $table = 'admin';
@@ -40,6 +41,8 @@ class Admin extends Model
     {
         return $this->belongsToMany(Role::class, 'admin_role');
     }
+
+
     public function hasPermission($permission)
     {
         foreach ($this->roles as $role) {
