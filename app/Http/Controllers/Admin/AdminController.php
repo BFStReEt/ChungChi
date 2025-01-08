@@ -64,4 +64,48 @@ class AdminController extends Controller
             ], 422);
         }
     }
+
+    public function edit(Request $request, int $id)
+    {
+        try {
+
+            $now = date('d-m-Y H:i:s');
+            $stringTime = strtotime($now);
+            DB::table('adminlogs')->insert([
+                'admin_id' => Auth::guard('admin')->user()->id,
+                'time' =>  $stringTime,
+                'ip' => $request ? $request->ip() : null,
+                'action' => 'edit a admin',
+                'cat' => 'admin',
+            ]);
+            $edit = $this->adminService->edit($id);
+            return $edit;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+    public function delete(Request $request, int $id)
+    {
+        try {
+            $now = date('d-m-Y H:i:s');
+            $stringTime = strtotime($now);
+            DB::table('adminlogs')->insert([
+                'admin_id' => Auth::guard('admin')->user()->id,
+                'time' =>  $stringTime,
+                'ip' => $request ? $request->ip() : null,
+                'action' => 'delete a admin',
+                'cat' => 'admin',
+            ]);
+            $destroy = $this->adminService->delete($id);
+            return $destroy;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

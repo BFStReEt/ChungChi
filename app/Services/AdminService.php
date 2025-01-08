@@ -164,7 +164,7 @@ class AdminService implements AdminServiceInterface
             $tokenRepository = app(TokenRepository::class);
             $tokenRepository->revokeAccessToken($tokenId);
 
-            // Thu hồi tất cả refresh token liên quan
+            //Thu hồi tất cả refresh token liên quan
             $refreshTokenRepository = app(RefreshTokenRepository::class);
             $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
 
@@ -197,7 +197,8 @@ class AdminService implements AdminServiceInterface
         abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.del'), 403, "No permission");
         Admin::where("id", $id)->delete();
         return response()->json([
-            'status' => true
+            'status' => true,
+            'message' => 'Delete Success'
         ]);
     }
 }

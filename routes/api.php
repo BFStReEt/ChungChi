@@ -11,6 +11,8 @@ Route::get('/user', function (Request $request) {
 
 Route::post('/admin/store', [AdminController::class, 'store']);
 Route::post('/admin/login', [AdminController::class, 'login']);
+Route::post('/admin/{id}', [AdminController::class, 'delete']);
+Route::get('/admin/{id}', [AdminController::class, 'edit']);
 Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/logout', [AdminController::class, 'logout']);
 });
