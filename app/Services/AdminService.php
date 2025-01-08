@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Gate;
 use App\Policies\AdminPolicy;
+use Laravel\Passport\TokenRepository;
 
 class AdminService implements AdminServiceInterface
 {
@@ -150,6 +151,17 @@ class AdminService implements AdminServiceInterface
                 'mess' => 'pass'
             ]);
         }
+    }
+
+    public function logout()
+    {
+        $tokenRepository = app(TokenRepository::class);
+        $tokenRepository->revokeAccessToken($this->user);
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Đăng xuất thành công'
+        ]);
     }
 
     public function edit($id)
