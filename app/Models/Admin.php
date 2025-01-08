@@ -42,7 +42,6 @@ class Admin extends Authenticatable
         return $this->belongsToMany(Role::class, 'admin_role');
     }
 
-
     public function hasPermission($permission)
     {
         foreach ($this->roles as $role) {

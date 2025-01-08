@@ -51,4 +51,17 @@ class AdminController extends Controller
             ], 422);
         }
     }
+
+    public function logout(Request $request)
+    {
+        try {
+            $logout = $this->adminService->logout($request);
+            return $logout;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

@@ -7,9 +7,9 @@ use App\Models\Admin;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Facades\Gate;
 use App\Policies\AdminPolicy;
 use Laravel\Passport\TokenRepository;
+use Laravel\Passport\RefreshTokenRepository;
 
 class AdminService implements AdminServiceInterface
 {
@@ -153,16 +153,34 @@ class AdminService implements AdminServiceInterface
         }
     }
 
-    public function logout()
+    public function logout($request)
     {
-        $tokenRepository = app(TokenRepository::class);
-        $tokenRepository->revokeAccessToken($this->user);
+        $user = $request->user();
+
+        if ($user) {
+            $tokenId = $user->token()->id;
+
+            // Thu hồi access token
+            $tokenRepository = app(TokenRepository::class);
+            $tokenRepository->revokeAccessToken($tokenId);
+
+            // Thu hồi tất cả refresh token liên quan
+            $refreshTokenRepository = app(RefreshTokenRepository::class);
+            $refreshTokenRepository->revokeRefreshTokensByAccessTokenId($tokenId);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Đăng xuất thành công'
+            ]);
+        }
 
         return response()->json([
-            'status' => true,
-            'message' => 'Đăng xuất thành công'
-        ]);
+            'status' => false,
+            'message' => 'Người dùng không hợp lệ'
+        ], 401);
     }
+
+
 
     public function edit($id)
     {
