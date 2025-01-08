@@ -152,5 +152,22 @@ class AdminService implements AdminServiceInterface
         }
     }
 
-    public function edit($request) {}
+    public function edit($id)
+    {
+        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.edit'), 403, "No permission");
+        $userAdminDetail = Admin::with('roles')->where('id', $id)
+            ->first();
+        return response()->json([
+            'status' => true,
+            'userAdminDetail' => $userAdminDetail,
+        ]);
+    }
+    public function delete($id)
+    {
+        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.del'), 403, "No permission");
+        Admin::where("id", $id)->delete();
+        return response()->json([
+            'status' => true
+        ]);
+    }
 }

@@ -17,19 +17,4 @@ class PermissionController extends Controller
 
         $this->permissionPolicy = $permissionPolicy;
     }
-
-    public function hehe()
-    {
-        if ($this->permissionPolicy->hasPermission($this->user, 'add')) {
-            return response()->json([
-                'status' => true,
-                'message' => 'hehe',
-            ]);
-        }
-
-        return response()->json([
-            'status' => false,
-            'message' => 'User does not have permission to add.',
-        ]);
-    }
 }

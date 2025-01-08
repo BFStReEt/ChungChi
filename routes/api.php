@@ -19,4 +19,3 @@ use App\Http\Controllers\AuthController;
 Route::get('/checkToken', [AuthController::class, 'checkToken']);
 
 Route::post('/permissions', [PermissionController::class, 'index']);
-Route::post('/hehe', [PermissionController::class, 'hehe']);
