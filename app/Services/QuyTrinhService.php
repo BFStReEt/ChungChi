@@ -22,8 +22,10 @@ class QuyTrinhService
         $fileName = $file->getClientOriginalName();
         $filePath = $file->storeAs('imports', $fileName);
 
-        $quyTrinhCategory = CateParent::where('name', 'Quy Trình')->first();
+
+        $quyTrinhCategory = CateParent::where('name', 'Quy trình')->first();
         $quyTrinhParentId = $quyTrinhCategory ? $quyTrinhCategory->id : null;
+
 
         $fileRecord = File::create([
             'name' => $fileName,

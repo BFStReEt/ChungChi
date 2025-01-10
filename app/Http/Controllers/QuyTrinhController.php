@@ -20,7 +20,7 @@ class QuyTrinhController extends Controller
     }
     public function import(Request $request)
     {
-        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'HỒ SƠ.import'), 403, "No permission");
+        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.import'), 403, "No permission");
         $result = $this->quyTrinhService->import($request);
         return response()->json([
             'status' => true,
