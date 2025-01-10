@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Policies\AdminPolicy;
 use App\Services\QuyTrinhService;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class QuyTrinhController extends Controller
 {
@@ -20,12 +22,28 @@ class QuyTrinhController extends Controller
     }
     public function import(Request $request)
     {
-        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.import'), 403, "No permission");
-        $result = $this->quyTrinhService->import($request);
-        return response()->json([
-            'status' => true,
-            'message' => 'Import thành công',
-            'data' => $result,
-        ]);
+        try {
+            $now = date('d-m-Y H:i:s');
+            $stringTime = strtotime($now);
+            DB::table('adminlogs')->insert([
+                'admin_id' => Auth::guard('admin')->user()->id,
+                'time' =>  $stringTime,
+                'ip' => $request ? $request->ip() : null,
+                'action' => 'import a file',
+                'cat' => 'admin',
+            ]);
+            abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.import'), 403, "No permission");
+            $result = $this->quyTrinhService->import($request);
+            return response()->json([
+                'status' => true,
+                'message' => 'Import thành công',
+                'data' => $result,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
     }
 }

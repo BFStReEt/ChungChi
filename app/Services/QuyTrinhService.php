@@ -20,13 +20,17 @@ class QuyTrinhService
         ]);
 
         $fileName = $file->getClientOriginalName();
-        $filePath = $file->storeAs('imports', $fileName);
-
+        $destinationPath = public_path('files/file');
+        $filePath = $destinationPath . '/' . $fileName;
 
         $quyTrinhCategory = CateParent::where('name', 'Quy trình')->first();
         $quyTrinhParentId = $quyTrinhCategory ? $quyTrinhCategory->id : null;
+        abort_if(File::exists($filePath), 409, "File đã tồn tại");
 
-
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true);
+        }
+        $file->move($destinationPath, $fileName);
         $fileRecord = File::create([
             'name' => $fileName,
             'path' => $filePath,
@@ -41,7 +45,7 @@ class QuyTrinhService
 
         return [
             'file_name' => $fileName,
-            'filePath' => $filePath,
+            'file_path' => 'files/file/' . $fileName,
             'file_record' => $fileRecord
         ];
     }
