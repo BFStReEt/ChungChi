@@ -180,8 +180,6 @@ class AdminService implements AdminServiceInterface
         ], 401);
     }
 
-
-
     public function edit($id)
     {
         abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.edit'), 403, "No permission");

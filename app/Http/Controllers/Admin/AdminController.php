@@ -68,7 +68,6 @@ class AdminController extends Controller
     public function edit(Request $request, int $id)
     {
         try {
-
             $now = date('d-m-Y H:i:s');
             $stringTime = strtotime($now);
             DB::table('adminlogs')->insert([
