@@ -11,9 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('cate_years', function (Blueprint $table) {
+        Schema::create('cate_year', function (Blueprint $table) {
             $table->id();
+            $table->unsignedBigInteger('child_id');
+            $table->integer('year');
             $table->timestamps();
+
+            $table->foreign('child_id')->references('id')->on('cate_child')->onDelete('cascade');
         });
     }
 
