@@ -46,4 +46,27 @@ class QuyTrinhController extends Controller
             ], 422);
         }
     }
+
+    public function export(Request $request)
+    {
+        try {
+            $now = date('d-m-Y H:i:s');
+            $stringTime = strtotime($now);
+            DB::table('adminlogs')->insert([
+                'admin_id' => Auth::guard('admin')->user()->id,
+                'time' =>  $stringTime,
+                'ip' => $request ? $request->ip() : null,
+                'action' => 'export a file',
+                'cat' => 'admin',
+            ]);
+            abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.export'), 403, "No permission");
+
+            return $this->quyTrinhService->export($request);
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
 }

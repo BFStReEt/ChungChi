@@ -19,7 +19,7 @@ Route::middleware('auth:admin')->group(function () {
 });
 
 Route::post('quytrinh/import', [QuyTrinhController::class, 'import']);
-
+Route::get('quytrinh/export', [QuyTrinhController::class, 'export']);
 
 //Check
 use App\Http\Controllers\PermissionController;
