@@ -3,10 +3,13 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class File extends Model
 {
+    use HasFactory;
     protected $fillable = ['parent_id', 'child_id', 'year_id', 'name', 'path', 'mime_type', 'description'];
+    protected $table = 'files';
 
     public function parent()
     {

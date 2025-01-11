@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\File;
 use Illuminate\Http\Request;
 use App\Policies\AdminPolicy;
 use App\Services\QuyTrinhService;
@@ -54,7 +55,7 @@ class QuyTrinhController extends Controller
             abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.export'), 403, "No permission");
 
             $filePath = public_path('Quy trinh/' . $request->url);
-            $fileName = Str::afterLast($request->url, '/'); // Lấy tên file
+            $fileName = Str::afterLast($request->url, '/');
 
             if (!file_exists($filePath)) {
                 return response()->json(['error' => 'File không tồn tại.'], 404);
@@ -65,6 +66,43 @@ class QuyTrinhController extends Controller
             $errorMessage = $e->getMessage();
             $response = [
                 'status' => 'false',
+                'error' => $errorMessage
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function delete(string $id)
+    {
+        try {
+            abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.delete'), 403, "No permission");
+            $file = File::where('id', $id)->first();
+            if (!$file) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'File không tồn tại.'
+                ], 404);
+            }
+            $filePath = public_path($file->path);
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            } else {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'File không tồn tại trong thư mục.'
+                ], 404);
+            }
+
+            $file->delete();
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Xóa file thành công.'
+            ]);
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $response = [
+                'status' => false,
                 'error' => $errorMessage
             ];
             return response()->json($response, 500);
