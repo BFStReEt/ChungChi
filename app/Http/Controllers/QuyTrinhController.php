@@ -7,6 +7,7 @@ use App\Policies\AdminPolicy;
 use App\Services\QuyTrinhService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
 
 class QuyTrinhController extends Controller
 {
@@ -50,23 +51,23 @@ class QuyTrinhController extends Controller
     public function export(Request $request)
     {
         try {
-            $now = date('d-m-Y H:i:s');
-            $stringTime = strtotime($now);
-            DB::table('adminlogs')->insert([
-                'admin_id' => Auth::guard('admin')->user()->id,
-                'time' =>  $stringTime,
-                'ip' => $request ? $request->ip() : null,
-                'action' => 'export a file',
-                'cat' => 'admin',
-            ]);
             abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.export'), 403, "No permission");
 
-            return $this->quyTrinhService->export($request);
+            $filePath = public_path('Quy trinh/' . $request->url);
+            $fileName = Str::afterLast($request->url, '/'); // Lấy tên file
+
+            if (!file_exists($filePath)) {
+                return response()->json(['error' => 'File không tồn tại.'], 404);
+            }
+
+            return response()->download($filePath, $fileName);
         } catch (\Exception $e) {
-            return response()->json([
-                'status' => false,
-                'message' => $e->getMessage()
-            ], 422);
+            $errorMessage = $e->getMessage();
+            $response = [
+                'status' => 'false',
+                'error' => $errorMessage
+            ];
+            return response()->json($response, 500);
         }
     }
 }

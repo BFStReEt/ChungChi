@@ -2,12 +2,12 @@
 
 namespace App\Services;
 
-use Illuminate\Support\Facades\File as FileFacade;
 use Illuminate\Http\Request;
 use App\Models\CateParent;
 use Illuminate\Support\Facades\File as FileSystem;
 use Illuminate\Support\Facades\Response;
 use App\Models\File;
+use Illuminate\Support\Str;
 
 class QuyTrinhService
 {
@@ -61,16 +61,16 @@ class QuyTrinhService
 
     public function export(Request $request)
     {
-        $fileName = $request->query('file');
-
-        if (!$fileName) {
-            throw new \InvalidArgumentException('Vui lòng cung cấp tên file.');
+        if (!$request->has('url') || empty($request->url)) {
+            return response()->json(['error' => 'URL file không được cung cấp.'], 400);
         }
 
-        $filePath = public_path('Quy trinh/' . $fileName);
+        $filePath = public_path($request->url);
+        $fileName = Str::afterLast($request->url, '/'); // Lấy tên file
 
-        if (!FileSystem::exists($filePath)) {
-            throw new \RuntimeException('File không tồn tại.');
+        // Kiểm tra file có tồn tại không
+        if (!file_exists($filePath)) {
+            return response()->json(['error' => 'File không tồn tại.'], 404);
         }
 
         return response()->download($filePath, $fileName);
