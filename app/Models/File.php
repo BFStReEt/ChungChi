@@ -4,25 +4,16 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-//Phiên bản cũ
+
+//Phiên bản mới
+
 class File extends Model
 {
     use HasFactory;
-    protected $fillable = ['parent_id', 'child_id', 'year_id', 'name', 'path', 'mime_type', 'description'];
-    protected $table = 'files';
+    protected $fillable = ['name', 'path', 'category_id'];
 
-    public function parent()
+    public function category()
     {
-        return $this->belongsTo(CateParent::class, 'parent_id');
-    }
-
-    public function child()
-    {
-        return $this->belongsTo(CateChild::class, 'child_id');
-    }
-
-    public function year()
-    {
-        return $this->belongsTo(CateYear::class, 'year_id');
+        return $this->belongsTo(Category::class);
     }
 }
