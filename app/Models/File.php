@@ -5,8 +5,6 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-//Phiên bản mới
-
 class File extends Model
 {
     use HasFactory;
