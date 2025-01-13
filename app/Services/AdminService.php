@@ -206,6 +206,28 @@ class AdminService implements AdminServiceInterface
         abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.manage'), 403, "No permission");
         $query =  Admin::with('roles')->orderBy('id', 'desc');
         $role_Id = $request->role_id;
-        $listAdminId = DB::table('admin_role')->where('role_id', $role_Id);
+        $listAdminId = DB::table('admin_role')->where('role_id', $role_Id)
+            ->join('admin', 'admin.id', '=', 'admin_role.admin_id')
+            ->select('admin.*')->pluck('id');
+        if (count($listAdminId) != 0) {
+            $query = Admin::with('roles')->where('id', $listAdminId);
+        } else {
+            return response()->json([
+                'status' => true,
+                'adminList' => [],
+            ]);
+        }
+        if ($request->data == 'undefined' || $request->data == "") {
+            $list = $query;
+        } else {
+
+            $list = $query->where('username', 'like', '%' . $request->data . '%')
+                ->orWhere('email', 'like', '%' . $request->data . '%');
+        }
+        $adminList = $list->paginate(5);
+        return response()->json([
+            'status' => true,
+            'adminList' => $adminList,
+        ]);
     }
 }
