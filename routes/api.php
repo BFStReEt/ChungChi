@@ -22,6 +22,7 @@ Route::middleware('auth:admin')->group(function () {
 Route::post('quytrinh/import', [QuyTrinhController::class, 'import']);
 Route::get('quytrinh/export', [QuyTrinhController::class, 'export']);
 Route::delete('quytrinh/delete/{id}', [QuyTrinhController::class, 'delete']);
+Route::post('quytrinh/find', [QuyTrinhController::class, 'findbyName']);
 
 
 //Check

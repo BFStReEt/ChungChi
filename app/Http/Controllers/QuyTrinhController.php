@@ -22,6 +22,44 @@ class QuyTrinhController extends Controller
         $this->quyTrinhService = $quyTrinhService;
         $this->permissionPolicy = $permissionPolicy;
     }
+
+    public function findbyName(Request $request)
+    {
+        try {
+            $search = $request->get('search');
+            $parentId = $request->get('parent_id');
+            $childId = $request->get('child_id');
+            $yearId = $request->get('year_id');
+            $pageSize = $request->get('page_size', 10);
+
+            $query = File::query();
+            if ($search) {
+                $query->where('name', 'like', '%' . $search . '%');
+            }
+            $query->where('parent_id', $parentId);
+            $query->where('child_id', $childId);
+            $query->where('year_id', $yearId);
+
+            $files = $query->paginate($pageSize);
+            return response()->json([
+                'status' => true,
+                'data' => $files
+            ]);
+        } catch (\Exception $e) {
+            $errorMessage = $e->getMessage();
+            $response = [
+                'status' => false,
+                'error' => $errorMessage
+            ];
+            return response()->json($response, 500);
+        }
+    }
+
+    public function index(Request $request)
+    {
+        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'QUY TRÌNH.manage'), 403, "No permission");
+    }
+
     public function import(Request $request)
     {
         try {
