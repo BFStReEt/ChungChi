@@ -86,9 +86,22 @@ class AdminController extends Controller
             ], 422);
         }
     }
-    public function delete(Request $request, int $id)
+    public function manage(Request $request)
     {
         try {
+            $manage = $this->adminService->manage($request);
+            return $manage;
+        } catch (\Exception $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage()
+            ], 422);
+        }
+    }
+    public function delete(Request $request, $id)
+    {
+        try {
+            $id = (int) $id;
             $now = date('d-m-Y H:i:s');
             $stringTime = strtotime($now);
             DB::table('adminlogs')->insert([

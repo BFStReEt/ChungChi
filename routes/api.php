@@ -4,16 +4,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\QuyTrinhController;
+use App\Models\Admin;
 use App\Providers\AuthServiceProvider;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
 
+//Admin
+Route::post('/admin/manage', [AdminController::class, 'manage']);
 Route::post('/admin/store', [AdminController::class, 'store']);
 Route::post('/admin/login', [AdminController::class, 'login']);
 Route::post('/admin/{id}', [AdminController::class, 'delete']);
 Route::get('/admin/{id}', [AdminController::class, 'edit']);
+
 Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/logout', [AdminController::class, 'logout']);
 });

@@ -201,30 +201,41 @@ class AdminService implements AdminServiceInterface
         ]);
     }
 
-    public function index($request)
+    public function manage($request)
     {
         abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.manage'), 403, "No permission");
-        $query =  Admin::with('roles')->orderBy('id', 'desc');
-        $role_Id = $request->role_id;
-        $listAdminId = DB::table('admin_role')->where('role_id', $role_Id)
-            ->join('admin', 'admin.id', '=', 'admin_role.admin_id')
-            ->select('admin.*')->pluck('id');
-        if (count($listAdminId) != 0) {
-            $query = Admin::with('roles')->where('id', $listAdminId);
-        } else {
-            return response()->json([
-                'status' => true,
-                'adminList' => [],
-            ]);
-        }
-        if ($request->data == 'undefined' || $request->data == "") {
-            $list = $query;
-        } else {
 
-            $list = $query->where('username', 'like', '%' . $request->data . '%')
-                ->orWhere('email', 'like', '%' . $request->data . '%');
+        $query = Admin::with('roles')->orderBy('id', 'desc');
+
+        $role_Id = $request->role_id;
+        $data = $request->data;
+
+        if ($role_Id && $role_Id != 'all') {
+            $listAdminId = DB::table('admin_role')
+                ->where('role_id', $role_Id)
+                ->join('admin', 'admin.id', '=', 'admin_role.admin_id')
+                ->select('admin.id')
+                ->pluck('id');
+
+            if (count($listAdminId) > 0) {
+                $query = $query->whereIn('id', $listAdminId);
+            } else {
+                return response()->json([
+                    'status' => true,
+                    'adminList' => [],
+                ]);
+            }
         }
-        $adminList = $list->paginate(5);
+
+        if ($data && $data != 'undefined' && $data != "") {
+            $query = $query->where(function ($q) use ($data) {
+                $q->where('username', 'like', '%' . $data . '%')
+                    ->orWhere('email', 'like', '%' . $data . '%');
+            });
+        }
+
+        $adminList = $query->paginate(5);
+
         return response()->json([
             'status' => true,
             'adminList' => $adminList,
