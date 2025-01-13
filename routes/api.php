@@ -12,14 +12,21 @@ Route::get('/user', function (Request $request) {
 })->middleware('auth:api');
 
 //Admin
+use App\Http\Controllers\CategoryController;
+
 Route::post('/admin/manage', [AdminController::class, 'manage']);
 Route::post('/admin/store', [AdminController::class, 'store']);
-Route::post('/admin/login', [AdminController::class, 'login']);
+Route::post('/admin/login', [AdminController::class, 'login'])->name('admin.login');
 Route::post('/admin/{id}', [AdminController::class, 'delete']);
 Route::get('/admin/{id}', [AdminController::class, 'edit']);
 
 Route::middleware('auth:admin')->group(function () {
     Route::post('/admin/logout', [AdminController::class, 'logout']);
+});
+
+//Category
+Route::middleware('auth:admin')->group(function () {
+    Route::get('categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [CategoryController::class, 'show']);
 });
 
 //Quy trình
