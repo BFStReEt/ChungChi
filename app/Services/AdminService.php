@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Validator;
 use App\Policies\AdminPolicy;
 use Laravel\Passport\TokenRepository;
 use Laravel\Passport\RefreshTokenRepository;
+use Illuminate\Support\Facades\DB;
 
 class AdminService implements AdminServiceInterface
 {
@@ -198,5 +199,13 @@ class AdminService implements AdminServiceInterface
             'status' => true,
             'message' => 'Delete Success'
         ]);
+    }
+
+    public function index($request)
+    {
+        abort_if(!$this->permissionPolicy->hasPermission($this->user, 'THÔNG TIN QUẢN TRỊ.Quản lý tài khoản admin.manage'), 403, "No permission");
+        $query =  Admin::with('roles')->orderBy('id', 'desc');
+        $role_Id = $request->role_id;
+        $listAdminId = DB::table('admin_role')->where('role_id', $role_Id);
     }
 }
