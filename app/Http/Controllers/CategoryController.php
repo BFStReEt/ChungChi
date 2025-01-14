@@ -26,10 +26,6 @@ class CategoryController extends Controller
             $files = [];
 
             if ($subCategorySlug) {
-                $subcategory = Str::slug($categorySlug . $subCategorySlug . "manage");
-                if (!$this->hasPermission($user, $subcategory)) {
-                    abort(403, "No permission");
-                }
                 $subCategory = Category::where('slug', $subCategorySlug)
                     ->where('parent_id', $category->id)
                     ->firstOrFail();
