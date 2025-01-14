@@ -6,13 +6,14 @@ use App\Http\Controllers\Admin\AdminController;
 use App\Http\Controllers\QuyTrinhController;
 use App\Models\Admin;
 use App\Providers\AuthServiceProvider;
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\TestController;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
+// Route::get('/user', function (Request $request) {
+//     return $request->user();
+// })->middleware('auth:api');
 
 //Admin
-use App\Http\Controllers\CategoryController;
 
 Route::post('/admin/manage', [AdminController::class, 'manage']);
 Route::post('/admin/store', [AdminController::class, 'store']);
@@ -25,15 +26,15 @@ Route::middleware('auth:admin')->group(function () {
 });
 
 //Category
-Route::middleware('auth:admin')->group(function () {
-    Route::get('categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [CategoryController::class, 'show']);
-});
+//Route::middleware('auth:admin')->group(function () {
+Route::get('/categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [CategoryController::class, 'show']); //});
+Route::post('/categories/permission', [CategoryController::class, 'checkPermission']);
 
 //Quy trình
-Route::post('quytrinh/import', [QuyTrinhController::class, 'import']);
-Route::get('quytrinh/export', [QuyTrinhController::class, 'export']);
-Route::delete('quytrinh/delete/{id}', [QuyTrinhController::class, 'delete']);
-Route::post('quytrinh/find', [QuyTrinhController::class, 'findbyName']);
+// Route::post('quytrinh/import', [QuyTrinhController::class, 'import']);
+// Route::get('quytrinh/export', [QuyTrinhController::class, 'export']);
+// Route::delete('quytrinh/delete/{id}', [QuyTrinhController::class, 'delete']);
+// Route::post('quytrinh/find', [QuyTrinhController::class, 'findbyName']);
 
 
 //Check
