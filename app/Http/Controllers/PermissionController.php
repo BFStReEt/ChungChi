@@ -8,13 +8,18 @@ use App\Policies\AdminPolicy;
 
 class PermissionController extends Controller
 {
-    protected $user;
-    protected $permissionPolicy;
-
-    public function __construct(AdminPolicy $permissionPolicy)
+    protected function hasPermission(Admin $admin, $slug)
     {
-        $this->user = auth('admin')->user();
+        $normalizedSlug = Str::slug($slug);
 
-        $this->permissionPolicy = $permissionPolicy;
+        $permissions = $admin->roles->flatMap(function ($role) {
+            return $role->permissions->pluck('slug');
+        });
+
+        $normalizedPermissions = $permissions->map(function ($permission) {
+            return Str::slug($permission);
+        });
+
+        return $normalizedPermissions->contains($normalizedSlug);
     }
 }
