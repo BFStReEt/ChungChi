@@ -63,8 +63,7 @@ class CategoryController extends Controller
         }
     }
 
-
-    public function hasPermission(Admin $admin, $slug)
+    protected function hasPermission(Admin $admin, $slug)
     {
         $normalizedSlug = Str::slug($slug);
 

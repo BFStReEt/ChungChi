@@ -7,7 +7,7 @@ use App\Http\Controllers\QuyTrinhController;
 use App\Models\Admin;
 use App\Providers\AuthServiceProvider;
 use App\Http\Controllers\CategoryController;
-use App\Http\Controllers\TestController;
+use App\Http\Controllers\FileController;
 
 // Route::get('/user', function (Request $request) {
 //     return $request->user();
@@ -26,10 +26,8 @@ Route::middleware('auth:admin')->group(function () {
 });
 
 //Category
-//Route::middleware('auth:admin')->group(function () {
-Route::get('/categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [CategoryController::class, 'show']); //});
-Route::post('/categories/permission', [CategoryController::class, 'checkPermission']);
-
+Route::get('/categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [CategoryController::class, 'show']);
+Route::get('file/import/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [FileController::class, 'import']);
 //Quy trình
 // Route::post('quytrinh/import', [QuyTrinhController::class, 'import']);
 // Route::get('quytrinh/export', [QuyTrinhController::class, 'export']);
