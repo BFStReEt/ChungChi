@@ -18,7 +18,35 @@ class FilesController extends Controller
 
         $files = $request->file('files');
 
-        $category = Category::where('slug', $categorySlug)->firstOrFail();
+        $category = Category::where('slug', $categorySlug)->first();
+        if (!$category) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Danh mục không tồn tại.',
+            ], 404);
+        }
+
+        $subCategory = $subCategorySlug ? Category::where('slug', $subCategorySlug)->where('parent_id', $category->id)->first() : null;
+        if ($subCategorySlug && !$subCategory) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Danh mục không tồn tại.',
+            ], 404);
+        }
+
+        $yearCategory = null;
+        if ($yearSlug) {
+            $yearCategory = Category::where('slug', $yearSlug)
+                ->where('parent_id', $subCategory ? $subCategory->id : $category->id)
+                ->first();
+
+            if (!$yearCategory) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Danh mục không tồn tại.',
+                ], 404);
+            }
+        }
 
         $hasSubCategory = Category::where('parent_id', $category->id)->exists();
         if ($hasSubCategory && !$subCategorySlug) {
@@ -28,7 +56,6 @@ class FilesController extends Controller
             ], 400);
         }
 
-        $subCategory = $subCategorySlug ? Category::where('slug', $subCategorySlug)->where('parent_id', $category->id)->first() : null;
         if ($subCategory) {
             $hasYearCategory = Category::where('parent_id', $subCategory->id)->exists();
             if ($hasYearCategory && !$yearSlug) {
@@ -39,17 +66,7 @@ class FilesController extends Controller
             }
         }
 
-        if ($yearSlug) {
-            $yearCategory = Category::where('slug', $yearSlug)->where('parent_id', $subCategory->id ?? null)->first();
-
-            if (!$yearCategory) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Danh mục năm không hợp lệ. Nó phải là danh mục con của danh mục con.',
-                ], 400);
-            }
-        }
-
+        // Đường dẫn lưu file
         $destinationPath = public_path($category->name);
         if ($subCategory) {
             $destinationPath .= '/' . $subCategory->name;
@@ -75,25 +92,27 @@ class FilesController extends Controller
             }
 
             $file->move($destinationPath, $fileName);
+
             $categoryId = $category->id;
             if ($subCategory) {
                 $categoryId = $subCategory->id;
             }
-            if ($yearSlug) {
-                $yearCategory = Category::where('slug', $yearSlug)->where('parent_id', $subCategory ? $subCategory->id : $category->id)->first();
-
-                if ($yearCategory) {
-                    $categoryId = $yearCategory->id;
-                }
+            if ($yearCategory) {
+                $categoryId = $yearCategory->id;
             }
+
             $fileRecord = File::create([
                 'name' => $fileName,
-                'path' => $category->name . ($subCategory ? '/' . $subCategory->name : '') . ($yearSlug ? '/' . $yearSlug : '') . '/' . $fileName,
+                'path' => $category->name .
+                    ($subCategory ? '/' . $subCategory->name : '') .
+                    ($yearSlug ? '/' . $yearSlug : '') .
+                    '/' . $fileName,
                 'category_id' => $categoryId,
             ]);
 
             $importedFiles[] = $fileRecord;
         }
+
         if ($existingFiles) {
             return response()->json([
                 'status' => false,
