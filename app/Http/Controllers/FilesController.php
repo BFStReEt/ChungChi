@@ -31,10 +31,10 @@ class FilesController extends Controller
         $subCategory = $subCategorySlug ? Category::where('slug', $subCategorySlug)->where('parent_id', $category->id)->first() : null;
         if ($subCategory) {
             $hasYearCategory = Category::where('parent_id', $subCategory->id)->exists();
-            if ($hasYearCategory) {
+            if ($hasYearCategory && !$yearSlug) {
                 return response()->json([
                     'status' => false,
-                    'message' => 'Không thể import vào danh mục con vì danh mục này có danh mục năm.',
+                    'message' => 'Không thể import vào danh mục con vì danh mục này có danh mục năm. Vui lòng chỉ định danh mục năm.',
                 ], 400);
             }
         }
@@ -94,12 +94,17 @@ class FilesController extends Controller
 
             $importedFiles[] = $fileRecord;
         }
+        if ($existingFiles) {
+            return response()->json([
+                'status' => false,
+                'message' => 'File đã tồn tại',
+            ]);
+        }
 
         return response()->json([
             'status' => true,
             'message' => 'Import thành công.',
             'imported_files' => $importedFiles,
-            'existing_files' => $existingFiles,
         ]);
     }
 }
