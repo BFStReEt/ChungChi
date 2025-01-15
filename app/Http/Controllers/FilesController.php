@@ -19,7 +19,34 @@ class FilesController extends Controller
         $files = $request->file('files');
 
         $category = Category::where('slug', $categorySlug)->firstOrFail();
+
+        $hasSubCategory = Category::where('parent_id', $category->id)->exists();
+        if ($hasSubCategory) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Không thể import vào danh mục cha vì danh mục này có danh mục con.',
+            ], 400);
+        }
+
         $subCategory = $subCategorySlug ? Category::where('slug', $subCategorySlug)->where('parent_id', $category->id)->first() : null;
+        if ($subCategory) {
+            $hasChildSubCategory = Category::where('parent_id', $subCategory->id)->exists();
+            if ($hasChildSubCategory) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Không thể import vào danh mục con vì danh mục này có danh mục con.',
+                ], 400);
+            }
+
+            $hasYearCategory = Category::where('parent_id', $subCategory->id)->exists();
+            if (!$hasYearCategory) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Import vào danh mục con mà không có danh mục năm được phép.',
+                ], 200);
+            }
+        }
+
         $yearCategory = $yearSlug ? Category::where('slug', $yearSlug)->where('parent_id', $subCategory->id ?? null)->first() : null;
 
         $destinationPath = public_path($category->name);
