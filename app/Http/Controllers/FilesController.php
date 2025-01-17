@@ -183,10 +183,10 @@ class FilesController extends Controller
         }
 
         $permissionSlug = $slugPath . "download";
-        echo $permissionSlug;
-        // if (!$this->hasPermission($this->user, $permissionSlug)) {
-        //     abort(403, "No permission");
-        // }
+
+        if (!$this->hasPermission($this->user, $permissionSlug)) {
+            abort(403, "No permission");
+        }
 
         $filePath = public_path($file->path);
 
@@ -197,8 +197,8 @@ class FilesController extends Controller
             ], 404);
         }
 
-        return response()->download($filePath, $file->name, [
-            'Content-Type' => mime_content_type($filePath),
+        return Response()->download($filePath, $file->name, [
+            'Content-Type' => FileSystem::mimeType($filePath),
         ]);
     }
     public function delete($id)
