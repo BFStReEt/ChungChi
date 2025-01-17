@@ -118,9 +118,28 @@ class AdminService implements AdminServiceInterface
         $val = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
+            'g-recaptcha-response' => 'required',
         ]);
         if ($val->fails()) {
             return response()->json($val->errors(), 202);
+        }
+
+        //reCAPTCHA
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
+            'form_params' => [
+                'secret' => config('services.recaptcha.secret_key'),
+                'response' => $request->input('g-recaptcha-response'),
+                'remoteip' => $request->ip(),
+            ],
+        ]);
+
+        $body = json_decode((string)$response->getBody());
+        if (!$body->success) {
+            return response()->json([
+                'status' => false,
+                'mess' => 'reCAPTCHA không hợp lệ.'
+            ], 422);
         }
         $now = date('d-m-Y H:i:s');
         $stringTime = strtotime($now);
