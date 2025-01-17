@@ -8,7 +8,14 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 class File extends Model
 {
     use HasFactory;
-    protected $fillable = ['name', 'path', 'category_id'];
+    protected $fillable = [
+        'name',
+        'path',
+        'category_id',
+        'mime_type',
+        'created_at',
+        'updated_at',
+    ];
 
     public function category()
     {

@@ -127,6 +127,7 @@ class FilesController extends Controller
 
             $fileRecord = File::create([
                 'name' => $fileName,
+                'mime_type' => $file->getClientMimeType(),
                 'path' => $category->name .
                     ($subCategory ? '/' . $subCategory->name : '') .
                     ($yearSlug ? '/' . $yearSlug : '') .
@@ -196,7 +197,9 @@ class FilesController extends Controller
             ], 404);
         }
 
-        return response()->download($filePath, $file->name);
+        return response()->download($filePath, $file->name, [
+            'Content-Type' => mime_content_type($filePath),
+        ]);
     }
     public function delete($id)
     {
