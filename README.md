@@ -13,3 +13,4 @@ php artisan passport:client --personal
 php .\artisan optimize:clear
 Composer create-project laravel/laravel login-passport
 
+http://localtest.me:8000/

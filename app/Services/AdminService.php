@@ -118,7 +118,7 @@ class AdminService implements AdminServiceInterface
         $val = Validator::make($request->all(), [
             'username' => 'required',
             'password' => 'required',
-            'g-recaptcha-response' => 'required',
+            'recaptcha-response' => 'required',
         ]);
         if ($val->fails()) {
             return response()->json($val->errors(), 202);
@@ -129,7 +129,7 @@ class AdminService implements AdminServiceInterface
         $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
             'form_params' => [
                 'secret' => config('services.recaptcha.secret_key'),
-                'response' => $request->input('g-recaptcha-response'),
+                'response' => $request->input('recaptcha-response'),
                 'remoteip' => $request->ip(),
             ],
         ]);
@@ -141,6 +141,7 @@ class AdminService implements AdminServiceInterface
                 'mess' => 'reCAPTCHA không hợp lệ.'
             ], 422);
         }
+
         $now = date('d-m-Y H:i:s');
         $stringTime = strtotime($now);
         $admin = Admin::where('username', $request->username)->first();
