@@ -151,14 +151,17 @@ class FilesController extends Controller
         ]);
     }
 
-    public function view(Request $request, $categorySlug, $subCategorySlug = null, $yearSlug = null)
+    public function download($id)
     {
-        $categorySlugNormalized = Str::slug($categorySlug . "export");
-        if (!$this->hasPermission($this->user, $categorySlugNormalized)) {
-            abort(403, "No permission for category");
+        $file = File::find($id);
+        if (!$file) {
+            return response()->json([
+                'status' => false,
+                'message' => 'File không tồn tại.',
+            ], 404);
         }
 
-        $category = Category::where('slug', $categorySlug)->first();
+        $category = Category::find($file->category_id);
         if (!$category) {
             return response()->json([
                 'status' => false,
@@ -166,70 +169,35 @@ class FilesController extends Controller
             ], 404);
         }
 
-        $subCategory = $subCategorySlug ? Category::where('slug', $subCategorySlug)->where('parent_id', $category->id)->first() : null;
-        if ($subCategorySlug && !$subCategory) {
+        $slugPath = $category->slug;
+
+        $parentCategory = Category::find($category->parent_id);
+        if ($parentCategory) {
+            $slugPath = $parentCategory->slug . $slugPath;
+
+            $grandParentCategory = Category::find($parentCategory->parent_id);
+            if ($grandParentCategory) {
+                $slugPath = $grandParentCategory->slug . $slugPath;
+            }
+        }
+
+        $permissionSlug = $slugPath . "download";
+        echo $permissionSlug;
+        // if (!$this->hasPermission($this->user, $permissionSlug)) {
+        //     abort(403, "No permission");
+        // }
+
+        $filePath = public_path($file->path);
+
+        if (!FileSystem::exists($filePath)) {
             return response()->json([
                 'status' => false,
-                'message' => 'Danh mục con không tồn tại.',
+                'message' => 'File không tồn tại trên hệ thống.',
             ], 404);
         }
 
-        if ($subCategorySlug) {
-            $subCategorySlugNormalized = Str::slug($categorySlug . $subCategorySlug . "export");
-            if (!$this->hasPermission($this->user, $subCategorySlugNormalized)) {
-                abort(403, "No permission for subcategory");
-            }
-        }
-
-        $yearCategory = null;
-        if ($yearSlug) {
-            $yearSlugNormalized = Str::slug($categorySlug . $subCategorySlug . $yearSlug . "export");
-            if (!$this->hasPermission($this->user, $yearSlugNormalized)) {
-                abort(403, "No permission for year category");
-            }
-
-            $yearCategory = Category::where('slug', $yearSlug)
-                ->where('parent_id', $subCategory ? $subCategory->id : $category->id)
-                ->first();
-
-            if (!$yearCategory) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Danh mục năm không tồn tại.',
-                ], 404);
-            }
-        }
-
-        $directoryPath = public_path($category->name);
-        if ($subCategory) {
-            $directoryPath .= '/' . $subCategory->name;
-        }
-        if ($yearSlug) {
-            $directoryPath .= '/' . $yearSlug;
-        }
-
-        if (!FileSystem::exists($directoryPath)) {
-            return response()->json([
-                'status' => false,
-                'message' => 'Không có file nào để export.',
-            ], 404);
-        }
-
-        $files = FileSystem::allFiles($directoryPath);
-        $downloadUrls = [];
-
-        foreach ($files as $file) {
-            $relativePath = str_replace(public_path(), '', $file->getRealPath());
-            $downloadUrls[] = url($relativePath);
-        }
-
-        return response()->json([
-            'status' => true,
-            'message' => 'Danh sách file đã được tạo.',
-            'files' => $downloadUrls,
-        ]);
+        return response()->download($filePath, $file->name);
     }
-
     public function delete($id)
     {
         $file = File::find($id);
@@ -249,28 +217,35 @@ class FilesController extends Controller
         }
 
         $slugPath = $category->slug;
-        $subCategory = Category::where('parent_id', $category->id)->first();
 
-        if ($subCategory) {
-            $slugPath .= $subCategory->slug;
+        $parentCategory = Category::find($category->parent_id);
+        if ($parentCategory) {
+            $slugPath = $parentCategory->slug . $slugPath;
 
-            $yearCategory = Category::where('parent_id', $subCategory->id)->first();
-            if ($yearCategory) {
-                $slugPath .= $yearCategory->slug;
+            $grandParentCategory = Category::find($parentCategory->parent_id);
+            if ($grandParentCategory) {
+                $slugPath = $grandParentCategory->slug . $slugPath;
             }
         }
 
-        $permissionSlug = $slugPath . "manage";
-        echo $permissionSlug; // In ra để kiểm tra
-        //$file->delete();
+        $permissionSlug = $slugPath . "delete";
 
-        // return response()->json([
-        //     'status' => true,
-        //     'message' => 'Xóa file thành công.',
-        // ]);
+        if (!$this->hasPermission($this->user, $permissionSlug)) {
+            abort(403, "No permission");
+        }
+
+        $filePath = public_path($file->path);
+        if (FileSystem::exists($filePath)) {
+            FileSystem::delete($filePath);
+        }
+
+        $file->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Xóa file thành công.',
+        ]);
     }
-
-
     public function hasPermission(Admin $admin, $slug)
     {
         $normalizedSlug = Str::slug($slug);
