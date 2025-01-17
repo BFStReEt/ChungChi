@@ -9,7 +9,7 @@
 </head>
 
 <body>
-    <h1>Test reCAPTCHA</h1>
+    <h1>Test captcha ?</h1>
     <form id="test-form">
         <div class="g-recaptcha" data-sitekey="6LcIW7oqAAAAAMg3xI8xH0vwJ5oqM-DDO6hytOQr"></div>
         <button type="submit">Submit</button>
@@ -20,7 +20,7 @@
             event.preventDefault();
             const token = grecaptcha.getResponse();
             if (!token) {
-                alert('Vui lòng hoàn thành reCAPTCHA.');
+                alert('Vui lòng hoàn thành recaptcha !!!');
                 return;
             }
             console.log('reCAPTCHA:', token);
