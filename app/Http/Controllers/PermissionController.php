@@ -3,12 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Admin;
-use Illuminate\Http\Request;
-use App\Policies\AdminPolicy;
+use Illuminate\Support\Str;
 
 class PermissionController extends Controller
 {
-    protected function hasPermission(Admin $admin, $slug)
+    public function hasPermission(Admin $admin, $slug)
     {
         $normalizedSlug = Str::slug($slug);
 

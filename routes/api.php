@@ -23,6 +23,8 @@ Route::get('/categories/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [Categor
 
 //File
 Route::post('/file/import/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [FilesController::class, 'import']);
+Route::post('/file/view/{categorySlug}/{subCategorySlug?}/{yearSlug?}', [FilesController::class, 'view']);
+Route::post('/file/delete/{id}', [FilesController::class, 'delete']);
 
 //Check
 use App\Http\Controllers\AuthController;
